@@ -14,15 +14,15 @@ import java.util.*;
 public class ServerConsoleGUI extends JFrame {
 
     // ── Palette ───────────────────────────────────────────────────────────────
-    private static final Color BG_DEEP    = new Color(18, 24, 38);
-    private static final Color BG_PANEL   = new Color(28, 36, 54);
-    private static final Color BG_CARD    = new Color(36, 46, 68);
-    private static final Color ACCENT     = new Color(0, 210, 170);
-    private static final Color ACCENT2    = new Color(72, 149, 255);
-    private static final Color WARN       = new Color(255, 199, 80);
-    private static final Color DANGER     = new Color(239, 71, 111);
-    private static final Color FG_TEXT    = new Color(220, 228, 245);
-    private static final Color FG_DIM     = new Color(130, 148, 180);
+    private static final Color BG_DEEP    = new Color(47, 51, 80);
+    private static final Color BG_PANEL   = new Color(47, 51, 80);
+    private static final Color BG_CARD    = new Color(47, 51, 80);
+    private static final Color ACCENT     = new Color(155, 142, 199);
+    private static final Color ACCENT2    = new Color(155, 142, 199);
+    private static final Color WARN       = new Color(155, 142, 199);
+    private static final Color DANGER     = new Color(155, 142, 199);
+    private static final Color FG_TEXT    = new Color(255, 255, 255);
+    private static final Color FG_DIM     = new Color(155, 142, 199);
     private static final Color BORDER_CLR = new Color(48, 62, 90);
 
     private static final int PORT = 5000;

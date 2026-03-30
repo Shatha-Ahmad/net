@@ -12,13 +12,13 @@ import java.util.Map;
 public class ClientGUI extends JFrame {
 
     // ── Palette ──────────────────────────────────────────────────────────────
-    private static final Color BG_DEEP    = new Color(18, 24, 38);
+    private static final Color BG_DEEP    = new Color(28, 36, 54);
     private static final Color BG_PANEL   = new Color(28, 36, 54);
-    private static final Color BG_CARD    = new Color(36, 46, 68);
-    private static final Color ACCENT     = new Color(0, 210, 170);
-    private static final Color ACCENT2    = new Color(72, 149, 255);
-    private static final Color WARN       = new Color(255, 199, 80);
-    private static final Color DANGER     = new Color(239, 71, 111);
+    private static final Color BG_CARD    = new Color(28, 36, 54);
+    private static final Color ACCENT     = new Color(0, 184, 176);
+    private static final Color ACCENT2    = new Color(0, 184, 176);
+    private static final Color WARN       = new Color(0, 184, 176);
+    private static final Color DANGER     = new Color(0, 184, 176);
     private static final Color FG_TEXT    = new Color(220, 228, 245);
     private static final Color FG_DIM     = new Color(130, 148, 180);
     private static final Color BORDER_CLR = new Color(48, 62, 90);
@@ -301,28 +301,63 @@ public class ClientGUI extends JFrame {
     private void showLoginDialog() {
         loginDialog = new JDialog(this, "ChatLite — Login", Dialog.ModalityType.APPLICATION_MODAL);
         loginDialog.getContentPane().setBackground(BG_PANEL);
+        loginDialog.setLayout(new BorderLayout(8, 8));
 
-        JPanel form = new JPanel(new GridLayout(4, 2, 8, 8));
+        // ===== FORM PANEL =====
+        JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(BG_PANEL);
         form.setBorder(new EmptyBorder(16, 16, 8, 16));
 
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Fields
         loginHostField = styledField("localhost");
         loginPortField = styledField("5000");
         loginUserField = styledField("");
         loginPassField = new JPasswordField();
+
         stylePasswordField(loginPassField);
 
-        form.add(dimLabel("Server IP:"));  form.add(loginHostField);
-        form.add(dimLabel("Port:"));       form.add(loginPortField);
-        form.add(dimLabel("Username:"));   form.add(loginUserField);
-        form.add(dimLabel("Password:"));   form.add(loginPassField);
+        // 👇 IMPORTANT: give proper width
+        loginHostField.setColumns(18);
+        loginPortField.setColumns(18);
+        loginUserField.setColumns(18);
+        loginPassField.setColumns(18);
 
+        // Row 1
+        gbc.gridx = 0; gbc.gridy = 0;
+        form.add(dimLabel("Server IP:"), gbc);
+        gbc.gridx = 1;
+        form.add(loginHostField, gbc);
+
+        // Row 2
+        gbc.gridx = 0; gbc.gridy = 1;
+        form.add(dimLabel("Port:"), gbc);
+        gbc.gridx = 1;
+        form.add(loginPortField, gbc);
+
+        // Row 3
+        gbc.gridx = 0; gbc.gridy = 2;
+        form.add(dimLabel("Username:"), gbc);
+        gbc.gridx = 1;
+        form.add(loginUserField, gbc);
+
+        // Row 4
+        gbc.gridx = 0; gbc.gridy = 3;
+        form.add(dimLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        form.add(loginPassField, gbc);
+
+        // ===== STATUS LABEL =====
         loginStatusLabel = new JLabel(" ");
         loginStatusLabel.setForeground(WARN);
         loginStatusLabel.setFont(new Font("Monospaced", Font.ITALIC, 11));
         loginStatusLabel.setBorder(new EmptyBorder(6, 16, 2, 16));
 
-        loginBtnConnect = styledButton("  Connect  ", ACCENT);
+        // ===== BUTTON =====
+        loginBtnConnect = styledButton("Connect", ACCENT);
         loginBtnConnect.setForeground(BG_DEEP);
         loginBtnConnect.setFont(new Font("Monospaced", Font.BOLD, 13));
 
@@ -330,29 +365,43 @@ public class ClientGUI extends JFrame {
         btns.setBackground(BG_PANEL);
         btns.add(loginBtnConnect);
 
-        loginDialog.getContentPane().setLayout(new BorderLayout(6, 6));
-        loginDialog.getContentPane().add(loginStatusLabel, BorderLayout.NORTH);
-        loginDialog.getContentPane().add(form,             BorderLayout.CENTER);
-        loginDialog.getContentPane().add(btns,             BorderLayout.SOUTH);
-        loginDialog.setSize(380, 240);
+        // ===== ADD TO DIALOG =====
+        loginDialog.add(loginStatusLabel, BorderLayout.NORTH);
+        loginDialog.add(form, BorderLayout.CENTER);
+        loginDialog.add(btns, BorderLayout.SOUTH);
+
+        // 🔥 IMPORTANT: auto-size instead of fixed size
+        loginDialog.pack();
+        loginDialog.setMinimumSize(new Dimension(420, loginDialog.getHeight()));
         loginDialog.setLocationRelativeTo(this);
 
+        // ===== BUTTON ACTION =====
         loginBtnConnect.addActionListener(e -> {
             String host = loginHostField.getText().trim();
+
             int port;
-            try { port = Integer.parseInt(loginPortField.getText().trim()); }
-            catch (NumberFormatException ex) { JOptionPane.showMessageDialog(loginDialog, "Invalid port"); return; }
+            try {
+                port = Integer.parseInt(loginPortField.getText().trim());
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(loginDialog, "Invalid port");
+                return;
+            }
+
             String user = loginUserField.getText().trim();
             String pass = new String(loginPassField.getPassword()).trim();
+
             if (user.isEmpty() || pass.isEmpty()) {
                 JOptionPane.showMessageDialog(loginDialog, "Username and password required");
                 return;
             }
+
             loginBtnConnect.setEnabled(false);
             loginStatusLabel.setText("Connecting...");
+
             new Thread(() -> {
                 connection.disconnect();
                 boolean ok = connection.connect(host, port);
+
                 if (!ok) {
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(loginDialog, "Cannot connect to server");
@@ -361,14 +410,17 @@ public class ClientGUI extends JFrame {
                     });
                     return;
                 }
+
                 connection.send("HELLO " + user + " " + pass);
-                SwingUtilities.invokeLater(() -> loginStatusLabel.setText("Authenticating..."));
+
+                SwingUtilities.invokeLater(() ->
+                        loginStatusLabel.setText("Authenticating...")
+                );
             }).start();
         });
 
         loginDialog.setVisible(true);
     }
-
     // ── Room logic ────────────────────────────────────────────────────────────
 
     /**
