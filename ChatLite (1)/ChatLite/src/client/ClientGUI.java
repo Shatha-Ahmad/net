@@ -485,21 +485,53 @@ public class ClientGUI extends JFrame {
 
     private void searchMessages() {
         String query = searchField.getText().trim().toLowerCase();
-        if (query.isEmpty()) return;
+
+        if (query.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter text to search.");
+            return;
+        }
+
         String[] lines = chatArea.getText().split("\n");
         StringBuilder results = new StringBuilder();
+
         for (String line : lines) {
-            if (line.toLowerCase().contains(query)) results.append(line).append("\n");
+
+            String cleanLine = line.trim();
+
+            // ❌ Skip non-message lines
+            if (cleanLine.isEmpty()
+                    || cleanLine.startsWith("──")
+                    || cleanLine.contains("chat history")) {
+                continue;
+            }
+
+            // ✅ Extract only message content (remove timestamp)
+            // format: [12:34:56] username: message
+            int idx = cleanLine.indexOf("] ");
+            if (idx != -1 && idx + 2 < cleanLine.length()) {
+                cleanLine = cleanLine.substring(idx + 2);
+            }
+
+            // ✅ Now search ONLY inside message
+            if (cleanLine.toLowerCase().contains(query)) {
+                results.append(line).append("\n"); // keep original formatting
+            }
         }
+
         if (results.length() == 0) {
             JOptionPane.showMessageDialog(this, "No results found for: " + query);
         } else {
+            JTextArea resultArea = new JTextArea(results.toString(), 12, 40);
+            resultArea.setLineWrap(true);
+            resultArea.setWrapStyleWord(true);
+            resultArea.setEditable(false);
+
             JOptionPane.showMessageDialog(this,
-                    new JScrollPane(new JTextArea(results.toString(), 10, 40)),
-                    "Search Results", JOptionPane.INFORMATION_MESSAGE);
+                    new JScrollPane(resultArea),
+                    "Search Results",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
-
     // ── Append helper (always writes to current room's buffer + chatArea) ─────
     private void appendToCurrentRoom(String text) {
         // keep the in-memory buffer in sync

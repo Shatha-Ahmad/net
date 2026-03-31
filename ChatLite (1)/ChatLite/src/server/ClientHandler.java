@@ -2,7 +2,9 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ClientHandler implements Runnable {
 
@@ -14,6 +16,7 @@ public class ClientHandler implements Runnable {
     private int inboxCount = 0;
     private int sentCount  = 0;
     private String clientIP;
+    private Set<String> loadedRooms = new HashSet<>();
 
     public ClientHandler(Socket socket, ServerConsoleGUI console) {
         this.socket   = socket;
@@ -105,13 +108,17 @@ public class ClientHandler implements Runnable {
                 out.println("210 JOINED " + roomName);
 
                 // send chat history to the joining user
-                List<String> history = ChatHistory.load(roomName);
-                if (!history.isEmpty()) {
+                if (!loadedRooms.contains(roomName)) {
+
+                    List<String> history = ChatHistory.load(roomName);
+
                     out.println("HIST_START " + roomName);
-                    for (String entry : history) {
-                        out.println("HIST " + entry);
+                    for (String l : history) {
+                        out.println("HIST " + roomName + " " + l);
                     }
                     out.println("HIST_END");
+
+                    loadedRooms.add(roomName); // ✅ mark as sent
                 }
                 break;
 

@@ -383,13 +383,60 @@ public class ServerConsoleGUI extends JFrame {
     }
 
     private void refreshSessions() {
+        // ✅ Save selected username
+        int selectedRow = -1;
+        String selectedUser = null;
+
+        if (sessionsTableModel.getRowCount() > 0) {
+            JTable table = findSessionsTable();
+            if (table != null) {
+                selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0) {
+                    selectedUser = (String) sessionsTableModel.getValueAt(selectedRow, 0);
+                }
+            }
+        }
+
+        // 🔄 Refresh table
         sessionsTableModel.setRowCount(0);
         for (Map.Entry<String, ClientHandler> entry : ChatServer.onlineUsers.entrySet()) {
             sessionsTableModel.addRow(new Object[]{
                     entry.getKey(), "ACTIVE", entry.getValue().getClientIP()
             });
         }
+
+        // ✅ Restore selection
+        if (selectedUser != null) {
+            JTable table = findSessionsTable();
+            if (table != null) {
+                for (int i = 0; i < sessionsTableModel.getRowCount(); i++) {
+                    if (sessionsTableModel.getValueAt(i, 0).equals(selectedUser)) {
+                        table.setRowSelectionInterval(i, i);
+                        break;
+                    }
+                }
+            }
+        }
+
         if (usersList != null) usersList.repaint();
+    }
+
+
+    private JTable findSessionsTable() {
+        // find the JTable inside the panel
+        for (Component comp : ((JPanel)getContentPane().getComponent(1)).getComponents()) {
+            if (comp instanceof JPanel panel) {
+                for (Component inner : panel.getComponents()) {
+                    if (inner instanceof JScrollPane scroll) {
+                        JViewport vp = scroll.getViewport();
+                        if (vp.getView() instanceof JTable table) {
+                            return table;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void refreshMailbox() {
@@ -611,6 +658,8 @@ public class ServerConsoleGUI extends JFrame {
             return this;
         }
     }
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(ServerConsoleGUI::new);
