@@ -320,7 +320,6 @@ public class ClientGUI extends JFrame {
 
         stylePasswordField(loginPassField);
 
-        // 👇 IMPORTANT: give proper width
         loginHostField.setColumns(18);
         loginPortField.setColumns(18);
         loginUserField.setColumns(18);
@@ -370,7 +369,6 @@ public class ClientGUI extends JFrame {
         loginDialog.add(form, BorderLayout.CENTER);
         loginDialog.add(btns, BorderLayout.SOUTH);
 
-        // 🔥 IMPORTANT: auto-size instead of fixed size
         loginDialog.pack();
         loginDialog.setMinimumSize(new Dimension(420, loginDialog.getHeight()));
         loginDialog.setLocationRelativeTo(this);
@@ -498,21 +496,21 @@ public class ClientGUI extends JFrame {
 
             String cleanLine = line.trim();
 
-            // ❌ Skip non-message lines
+            //  Skip non-message lines
             if (cleanLine.isEmpty()
                     || cleanLine.startsWith("──")
                     || cleanLine.contains("chat history")) {
                 continue;
             }
 
-            // ✅ Extract only message content (remove timestamp)
+            //  Extract only message content (remove timestamp)
             // format: [12:34:56] username: message
             int idx = cleanLine.indexOf("] ");
             if (idx != -1 && idx + 2 < cleanLine.length()) {
                 cleanLine = cleanLine.substring(idx + 2);
             }
 
-            // ✅ Now search ONLY inside message
+            //  Now search ONLY inside message
             if (cleanLine.toLowerCase().contains(query)) {
                 results.append(line).append("\n"); // keep original formatting
             }
@@ -681,7 +679,26 @@ public class ClientGUI extends JFrame {
                     roomChats.computeIfAbsent(msgRoom, k -> new StringBuilder()).append(line);
                 }
 
-            } else if (msg.startsWith("PM")) {
+            }
+            else if (msg.startsWith("BROADCAST")) {
+
+                String content = msg.substring(10).trim(); // remove "BROADCAST"
+
+                String line = "[" + getTime() + "] " + content + "\n";
+
+
+                // always show in General room
+                roomChats.computeIfAbsent("General", k -> new StringBuilder()).append(line);
+
+                // If user is currently in General → update UI
+                if (currentRoom.equals("General")) {
+                    chatArea.append(line);
+                    chatArea.setCaretPosition(chatArea.getDocument().getLength());
+                }
+
+                addLog("Broadcast received");
+            }
+            else if (msg.startsWith("PM")) {
                 String[] parts = msg.split(" ", 3);
                 String sender  = parts[1];
                 String pmMsg   = parts.length > 2 ? parts[2] : "";

@@ -142,7 +142,7 @@ public class ServerConsoleGUI extends JFrame {
             }
         });
 
-        JButton btnBroadcast = styledButton("📢 Broadcast", ACCENT2);
+        JButton btnBroadcast = styledButton(" Broadcast", ACCENT2);
         btnBroadcast.addActionListener(e -> sendBroadcast());
 
         JPanel broadcastRow = new JPanel(new BorderLayout(4, 4));
@@ -266,7 +266,7 @@ public class ServerConsoleGUI extends JFrame {
         scroll.setBorder(new LineBorder(BORDER_CLR, 1));
         scroll.getViewport().setBackground(BG_DEEP);
 
-        JButton btnForceCleanup = styledButton("🧹 Force Cleanup (Archive > 30 days)", DANGER);
+        JButton btnForceCleanup = styledButton(" Force Cleanup (Archive > 30 days)", DANGER);
         btnForceCleanup.addActionListener(e -> {
             addLog("Force cleanup executed.");
             JOptionPane.showMessageDialog(this, "Archive cleanup done!");
@@ -383,7 +383,7 @@ public class ServerConsoleGUI extends JFrame {
     }
 
     private void refreshSessions() {
-        // ✅ Save selected username
+        //  Save selected username
         int selectedRow = -1;
         String selectedUser = null;
 
@@ -405,7 +405,7 @@ public class ServerConsoleGUI extends JFrame {
             });
         }
 
-        // ✅ Restore selection
+        //  Restore selection
         if (selectedUser != null) {
             JTable table = findSessionsTable();
             if (table != null) {
